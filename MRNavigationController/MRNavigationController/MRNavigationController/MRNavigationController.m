@@ -74,16 +74,25 @@
 	else
 	{
 		//Get the top controller
-		MRViewController* topController = [self.controllers pop];
-		
+		MRViewController* topController = (MRViewController *)[self.controllers pop];
+		NSParameterAssert([topController isKindOfClass:[MRViewController class]]);
+
 		//Execute its pop handler
 		if (topController.onPop)
+		{
 			topController.onPop();
-		
+		}
+
 		//If this a multi-level pop, remove the popped controllers from our internal stack
 		while (((MRViewController*)[self.controllers peek]).controller != viewController)
-			[self.controllers pop];
-			
+		{
+			id lastObject = [self.controllers pop];
+			if (lastObject == nil)
+			{
+				return;
+			}
+		}
+
 		//Show or hide the navigation contoller's navigation bar and tool bar according to the new top controller's preferences
 		topController = [self.controllers peek];
 		[self setNavigationBarHidden:topController.navigationBarHidden toolbarHidden:topController.toolbarHidden animated:animated];
@@ -97,8 +106,10 @@
 	{
 		//Execute its completion handler
 		if (self.pushedController.onPush)
+		{
 			self.pushedController.onPush();
-		
+		}
+
 		//Reset the temp variable
 		self.pushedController = nil;
 	}
